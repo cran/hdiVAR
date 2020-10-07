@@ -1,0 +1,265 @@
+---
+title: "Vignette of R package hdiVAR"
+author: "Xiang Lyu"
+date: "Sep 25, 2020"
+output:
+  rmarkdown::html_vignette: default
+vignette: >
+  %\VignetteIndexEntry{hdiVAR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+<a id="top"></a>
+
+> [Basic info](#basic)
+
+> [Problem setup](#setup)
+
+> [Methodology](#method)
+
+> [Quick Start](#example)
+
+> [Reference](#ref)
+
+
+
+<a id="basic"></a>
+
+# Basic Info 
+
+This package considers the estimation and statistical inference of high-dimensional vector autoregression with measurement error, also known as linear gaussian state-space model. A sparse expectation-maximization (EM) algorithm is provided for parameter estimation. For transition matrix inference, both global testing and simultaneous testing are implemented, with consistent size and false discovery rate (FDR) control. The methods are proposed in [Lyu et al. (2020)][1].
+
+ 
+ 
+<a id="setup"></a>
+
+# Problem setup 
+
+
+The model of interest is high-dimensional vector autoregression (VAR) with measurement error, 
+$$
+\mathbf{y}_{t} =  \mathbf{x}_{t} + \mathbf{\epsilon}_{t}, \ \ \ \     
+\mathbf{x}_{t+1}  =  \mathbf{A}_* \mathbf{x}_{t}  + \mathbf{\eta}_{t},
+$$
+where $\mathbf{y}_{t} \in \mathbb{R}^{p}$ is the observed multivariate time series, $\mathbf{x}_{t}\in  \mathbb{R}^{p}$ is the multivariate latent signal that admits an autoregressive structure, $\mathbf{\epsilon}_{t}\in \mathbb{R}^{p}$ is the measurement error for the observed time series, $\mathbf{\eta}_{t} \in \mathbb{R}^{p}$ is the white noise of the latent signal, and $\mathbf{A}_*\in \mathbb{R}^{p\times p}$ is the sparse transition matrix that encodes the directional relations among the latent signal variables of $\mathbf{x}_{t}$. Furthermore, we focus on the scenario $\|\mathbf{A}_*\|_2 <1$ such that the VAR model of $\mathbf{x}_{t}$ is stationary. The error terms $\mathbf{\epsilon}_{t}$ and $\mathbf{\eta}_{t}$ are i.i.d.\ multivariate normal with mean zero and covariance $\sigma_{\epsilon,*}^2 \mathbf{I}_p$ and $\sigma_{\eta,*}^2 \mathbf{I}_p$, respectively, and are independent of $\mathbf{x}_{t}$. This package can handle high-dimensional setting where $p^2$ exceeds the length of series $T$. 
+
+
+Estimation aims to recover $\{\mathbf{A}_*, \sigma_{\eta,*}^2, \sigma_{\epsilon,*}^2\}$ from observation $\mathbf{y}_{t}$'s. The statistical inference goal is the transition matrix $\mathbf{A}_*$. The global hypotheses is
+$$
+H_{0}: A_{*,ij} = A_{0,ij}, \  \textrm{ for all } (i,j) \in \mathcal{S} \quad \textrm{versus} \quad  H_{1}: A_{*,ij} \neq A_{0,ij},  \ \textrm{ for some } (i,j) \in \mathcal{S},
+$$
+for a given $\mathbf{A}_{0} = (A_{0,ij}) \in \mathbb{R}^{p \times p}$ and $\mathcal{S} \subseteq [p] \times [p]$, where $[p] = \{1, \ldots, p\}$. The most common choice is $\mathbf{A}_0=\mathbf{0}_{p\times p}$ and $\mathcal{S} =[p] \times [p]$. The simultaneous hypotheses are 
+$$
+H_{0; ij}: A_{*,ij} = A_{0,ij},  \quad \textrm{versus} \quad  H_{1; ij}: A_{*,ij} \ne A_{0,ij},  \ \textrm{ for all } (i, j) \in \mathcal{S}. 
+$$
+
+
+
+
+<a id="method"></a>
+
+# Methodology
+
+## 1. Estimation: sparse EM algorithm
+
+Let $\{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T}$ denote the complete data, where $T$ is the total number of observations, $\mathbf{y}_{t}$ is observed but $\mathbf{x}_{t}$ is latent. Let $\Theta = \left\{ \mathbf{A}, \sigma_{\eta}^2, \sigma_{\epsilon}^2 \right\}$ collect all the parameters of interest in model \eqref{eq: model_measure}, and $\Theta_* = \left\{ \mathbf{A}_*, \sigma_{\eta,*}^2, \sigma_{\epsilon,*}^2 \right\}$ denote the true parameters. The goal is to estimate $\Theta_*$ by maximizing the log-likelihood function of the observed data, $\ell (\Theta | \{\mathbf{y}_{t}\}_{t=1}^T)$, with respect to $\Theta$.  The computation of $\ell (\Theta | \{\mathbf{y}_{t}\}_{t=1}^T)$, however, is highly nontrivial. Sparse EM algorithm then turns to an auxiliary function, named the finite-sample $Q$-function, 
+$$
+Q_y (\Theta | \Theta') = \mathbb{E} \left[ \ell\left( \Theta | \{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T} \right) | \{ \mathbf{y}_{t}\}_{t=1}^T, \Theta' \right],
+$$
+which is defined as the expectation of the log-likelihood function for the complete data $\ell(\Theta | \{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T})$, conditioning on a parameter set $\Theta'$ and the observed data $\mathbf{y}_t$, and the expectation is taken with respect to the latent data $\mathbf{x}_t$.  The $Q$-function can be computed efficiently by Kalman filter and smoothing, and provides a lower bound of the target log-likelihood function $\ell (\Theta|\{\mathbf{y}_{t}\}_{t=1}^T)$ for any $\Theta$. The equality $\ell (\Theta'|\{\mathbf{y}_{t}\}_{t=1}^T) = Q_y(\Theta' | \Theta')$ holds if $\Theta = \Theta'$. Maximizing Q-function provides an uphill step of the likelihood. Starting from an initial set of parameters $\hat\Theta_0$, sparse EM algorithm then alternates between the expectation step (E-step), where the $Q$-function $Q_y (\Theta | \hat{\Theta}_{k})$  conditioning on the parameters $\hat\Theta_{k}$ of the $k$th iteration is computed, and the maximization step (M-step), where the parameters are updated by maximizing the $Q$-function $\hat{\Theta}_{k+1} = \arg\max_{\Theta} Q_y (\Theta | \hat{\Theta}_{k})$. 
+
+For the M-step, the maximizer of $Q_y(\Theta | \hat{\Theta}_{k})$  satisfies  that  $\frac{1}{T-1} \sum_{t=1}^{T-1} \mathbf{E}_{t,t+1;k} = \{\frac{1}{T-1}\sum_{t=1}^{T-1} \mathbf{E}_{t,t;k} \}\mathbf{A}^\top$, where $\mathbf{E}_{t,s;k} = \mathbb{E} \left\{ \mathbf{x}_{t}\mathbf{x}_{s}^\top | \{\mathbf{y}_{t'}\}_{t'=1}^T, \hat{\Theta}_{k-1} \right\}$ for $s, t\in [T]$ is obtained from the E-step. Instead of directly inverting the matrix involving $\mathbf{E}_{t,t;k}$'s, which is computationally challenging when the dimension $p$ is high and yields a dense estimator of $\mathbf{A}_*$ leading to a divergent statistical error, sparse EM algorithm implements generalized Dantzig selector for Yule-Walker equation,  
+$$
+\hat{\mathbf{A}}_{k} = \arg\min_{\mathbf{A} \in \mathbb{R}^{p\times p}}  \|\mathbf{A}\|_1, \;\; \textrm{such that} \;  \left\| \frac{1}{T-1} \sum_{t=1}^{T-1}   \mathbf{E}_{t,t+1;k} -\frac{1}{T-1} \sum_{t=1}^{T-1} \mathbf{E}_{t,t;k} \mathbf{A}^\top \right\|_{\max} \le \tau_k,
+$$
+where $\tau_k$ is the tolerance parameter that is tuned via cross-validation each iteration (in the observed time series, first `Ti_train` time points serve as training set, then gap `Ti_gap` time points, and use the remain as test set). The optimization problem \eqref{eq: sparse_A} is solved using linear programming in a row-by-row parallel fashion. In the package, an option of further hard thresholding $\hat{\mathbf{A}}_{k}$ is provided to improve model selection performance. Hard thresholding sets entries of magnitude less than threshold level as zero. The variance estimates are next updated as, 
+$$
+\begin{align} \label{eqn: epsilon}
+\begin{split}
+\hat\sigma_{\eta,k}^2 & =  \frac{1}{p(T-1)} \sum_{t=1}^{T-1} \left\{ \mathrm{tr}( \mathbf{E}_{t+1,t+1;k})  -   \mathrm{tr}\left ( \hat{\mathbf{A}}_{k}  \mathbf{E}_{t,t+1;k} \right) \right\} , \\
+\hat\sigma^2_{\epsilon,k} & =  \frac{1}{pT } \sum_{t=1}^{T} \left\{ \mathbf{y}_{t}^\top \mathbf{y}_{t} - 2 \mathbf{y}_{t}^\top  \mathbf{E}_{t;k} + \mathrm{tr} (\mathbf{E}_{t,t;k}) \right\}, 
+\end{split}  
+\end{align} 
+$$
+where $\mathbf{E}_{t;k} = \mathbb{E} \{ \mathbf{x}_{t} | \{\mathbf{y}_{t'}\}_{t'=1}^T, \hat{\Theta}_{k-1} \}$ for $t \in [T]$, and \eqref{eqn: epsilon} comes from taking derivative on $Q_y(\Theta | \hat{\Theta}_{k})$. Sparse EM algorithm terminates when reaches the maximal number of iterations or the estimates are close enough in two consecutive iterations, e.g., $\min \left\{ \|\hat{\mathbf{A}}_{k} -\hat{\mathbf{A}}_{k-1} \|_F ,  | \hat{\sigma}_{\eta,k }-\hat{\sigma}_{\eta,k-1}| ,| \hat{\sigma}_{\epsilon, k}-\hat{\sigma}_{\epsilon, k-1}| \right\} \le 10^{-3}$.
+
+ 
+ 
+ 
+## 2. Statistical inference 
+
+#### 2.a Gaussian test statistic matrix 
+The fundamental tools of testing is a gausisan test statistic matrix whose entries marginally follow standard normal under null. 
+
+
+The test statistic is constructed as follows. Observation $\mathbf{y}_t$ follows an autoregressive structure, $\mathbf{y}_{t+1} =  \mathbf{A}_* \mathbf{y}_{t} + \mathbf{e}_{t}$, with the error term $\mathbf{e}_{t} = - \mathbf{A}_* \mathbf{\epsilon}_{t}+  \mathbf{\epsilon}_{t+1} +   \mathbf{\eta}_{t}$. Then the lag-1 auto-covariance of the error $\mathbf{e}_t$ is of the form, 
+$$
+\mathbf{\Sigma}_e = \mathrm{Cov}(\mathbf{e}_{t},\mathbf{e}_{t-1}) = -\sigma_{\epsilon,*}^2 \mathbf{A}_*.
+$$
+This suggests that we can apply the covariance testing methods on $\mathbf{\Sigma}_e$ to infer transition matrix $\mathbf{A}_*$. However, $\mathbf{e}_t$ is not directly observed. 
+Define generic estimates of $\Theta_*$ by $\left \{\hat{\mathbf{A}},\hat\sigma_{\epsilon}^2, \hat\sigma_{\eta}^2 \right\}$ (sparse EM estimates also work). 
+We use them to reconstruct this error, and obtain the sample lag-1 auto-covariance estimator, 
+$$\hat{\mathbf{\Sigma}}_e = \frac{1}{T-2} \sum_{t=2}^{T-1} \hat{\mathbf{e}}_{t}\hat{\mathbf{e}}_{t-1}^\top, \ \text{where} \ \ \hat{\mathbf{e}}_{t} = \mathbf{y}_{t+1}  - \hat{\mathbf{A}} \mathbf{y}_{t} - \frac{1}{T-1}\sum_{t'=1}^{T-1} (\mathbf{y}_{t'+1} - \hat{\mathbf{A}}\mathbf{y}_{t'}).$$
+
+This sample estimator $\hat{\mathbf{\Sigma}}_e$, nevertheless, involves some bias due to the reconstruction of the error term, and also an inflated variance due to the temporal dependence of the time series data. Bias and variance correction lead to the Gaussian matrix test statistic $\mathbf{H}$, whose $(i,j)$th entry is,  
+$$
+H_{ij} = \frac{ \sum_{t=2}^{T-1}  \{ \hat{e}_{ t,i}\hat{e}_{ t-1,j} + \left( \hat{\sigma}_{\eta}^2 +\hat{\sigma}_{\epsilon}^2 \right)  \hat{A}_{ij}  - \hat{\sigma}_\eta^2 A_{0,ij} \} }{\sqrt{T-2} \; \hat{\sigma}_{ij}}, \quad i,j \in [p]. 
+$$
+[Lyu et al. (2020)][1] proves that, under mild assumptions,  
+$$
+\frac{ \sum_{t=2}^{T-1}  \{\hat{e}_{ t,i}\hat{e}_{ t-1,j} + \left( \hat{\sigma}_{\eta}^2 +\hat{\sigma}_{\epsilon}^2 \right)  \hat{A}_{ij}  - \hat{\sigma}_\eta^2 A_{*,ij} \}}{\sqrt{T-2} \; \hat{\sigma}_{ij}}\rightarrow_{d} \mathrm{N}(0, 1)
+$$
+uniformly for $i,j \in [p]$ as $p, T \to \infty$. 
+
+
+
+
+#### 2.b Global testing
+
+The key insight of global testing is that the squared maximum entry of a zero mean normal vector converges to a Gumbel distribution. Specifically, the global test statistic is  
+$$
+G_{\mathcal{S}} = \max_{(i,j) \in \mathcal{S}} H_{ij}^2. 
+$$
+[Lyu et al. (2020)][1] justifies that the asymptotic null distribution of $G_{\mathcal{S}}$ is Gumbel, 
+$$
+\lim_{|\mathcal{S}| \rightarrow \infty} \mathbb{P} \Big( G_\mathcal{S}  -2 \log |\mathcal{S}| + \log \log |\mathcal{S}| \le x \Big) = \exp \left\{- \exp (-x/2) / \sqrt{\pi} \right\}.
+$$
+It leads to an asymptotic $\alpha$-level test,
+\begin{eqnarray*}
+\Psi_\alpha = \mathbb{1} \big[ G_\mathcal{S} > 2 \log |\mathcal{S}| -  \log \log |\mathcal{S}| - \log \pi -2 \log\{-\log(1-\alpha)\} \big]. 
+\end{eqnarray*}
+The global null is rejected if $\Psi_\alpha=1$. 
+
+
+
+
+#### 2.c Simultaneous testing 
+
+Let $\mathcal{H}_0 = \{(i,j) : A_{*,ij}=A_{0,ij}, (i,j) \in \mathcal{S} \}$ denote the set of true null hypotheses, and $\mathcal{H}_1 = \{ (i,j) : (i,j)\in \mathcal{S} , (i,j) \notin \mathcal{H}_0\}$ denote the set of true alternatives. The test statistic $H_{ij}$ follows a standard normal distribution when $H_{0;ij}$ holds, and as such, we reject $H_{0;ij}$ if $|H_{ij}| > t$ for some thresholding value $t > 0$. Let $R_{\mathcal{S}}(t) = \sum_{(i,j) \in \mathcal{S}} \mathbb{1} \{ |H_{ij}|> t\}$ denote the number of rejections at $t$. Then the false discovery proportion (FDP) and the false discovery rate (FDR) in the simultaneous testing problem are,
+\begin{eqnarray*}
+\textrm{FDP}_{\mathcal{S}}(t)=\frac{\sum_{(i,j) \in \mathcal{H}_0} \mathbb{1} \{ |H_{ij}|> t\}}{R_{\mathcal{S}}(t)\vee 1}, \;\; \textrm{ and  } \;\; 
+\textrm{FDR}_{\mathcal{S}}(t) = \mathbb{E} \left\{ \textrm{FDP}_{\mathcal{S}}(t) \right\}.
+\end{eqnarray*}
+An ideal choice of the threshold $t$ is to reject as many true positives as possible, while controlling the false discovery at the pre-specified level $\beta$, that is $\inf \{ t > 0 : \text{FDP}_{\mathcal{S}} (t) \le \beta \}$.  However, $\mathcal{H}_0$ in $\text{FDP}_{\mathcal{S}} (t)$ is unknown. Observing that $\mathbb{P} ( |H_{ij}|> t ) \approx 2\{ 1- \Phi (t) \}$, where $\Phi (\cdot)$ is the cumulative distribution function of a standard normal distribution, the false rejections $\sum_{(i,j) \in\mathcal{H}_0} \mathbb{1} \{ |H_{ij}|> t\}$ in $\text{FDP}_{\mathcal{S}} (t)$ can be approximated by $\{ 2- 2 \Phi(t) \} |\mathcal{S}|$. 
+Moreover,  the search of $t$ is restricted to the range $\left(0, \sqrt{2\log |\mathcal{S}|} \right]$, since $\mathbb{P}\left( \hat{t} \text{ exists in } \left(0, \sqrt{2\log |\mathcal{S}|}\right] \right) \to 1$ as shown in the theoretical justification of [Lyu et al. (2020)][1]. The simultaneous testing procedure is justified that consistently control FDR, 
+$$
+\lim_{|\mathcal{S}| \to \infty} \frac{\text{FDR}_{\mathcal{S}} (\, \hat{t} \; )}{\beta |\mathcal{H}_0|/|\mathcal{S}|} = 1, \quad \textrm{ and } \quad 
+\frac{\text{FDP}_{\mathcal{S}} (\, \hat{t} \; )}{\beta | \mathcal{H}_0|/|\mathcal{S}|}\rightarrow_{p} 1 \;\;  \textrm{ as } \; |\mathcal{S}| \to \infty.
+$$
+
+
+
+<a id="example"></a>
+
+
+# Quick start 
+
+
+The purpose of this section is to show users the basic usage of this package. We will briefly go through main functions, see what they can do and have a look at outputs. An detailed example of complete procedures of estimation and inference is be presented to give users a general sense of the pakcage.
+
+
+We first generate observations from the model. 
+```{r}
+library(hdiVAR)
+
+set.seed(123)
+p=3; Ti=400  # dimension and time
+A=diag(1,p) # transition matrix
+sig_eta=sig_epsilon=0.2 # error std
+Y=array(0,dim=c(p,Ti)) #observation t=1, ...., Ti
+X=array(0,dim=c(p,Ti)) #latent t=1, ...., T
+Ti_burnin=400 # time for burn-in to stationarity
+for (t in 1:(Ti+Ti_burnin)) {
+ if (t==1){
+   x1=rnorm(p)
+ } else if (t<=Ti_burnin) { # burn in
+   x1=A%*%x1+rnorm(p,mean=0,sd=sig_eta)
+ } else if (t==(Ti_burnin+1)){ # time series used for learning
+   X[,t-Ti_burnin]=x1
+   Y[,t-Ti_burnin]=X[,t-Ti_burnin]+rnorm(p,mean=0,sd=sig_epsilon)
+ } else {
+   X[,t- Ti_burnin]=A%*%X[,t-1- Ti_burnin]+rnorm(p,mean=0,sd=sig_eta)
+   Y[,t- Ti_burnin]=X[,t- Ti_burnin]+rnorm(p,mean=0,sd=sig_epsilon)
+ }
+}
+```
+
+
+The first example is sparse EM algorithm. 
+```{r}
+# cross-validation grid of tolerance parameter \tau_k in Dantzig selector.
+tol_seq=c(0.0001,0.0003,0.0005) 
+
+# cross-validation grid of hard thresholding levels in transition matrix estimate. 
+# Set as zero to avoid thresholding. The output is \hat{A}_k.
+ht_seq=0 
+
+
+A_init=diag(0.1,p) # initial estimate of A 
+# initial estimates of error variances 
+sig2_eta_init=sig2_epsilon_init=0.1 
+
+# the first half time points are training data 
+Ti_train=Ti*0.5
+
+# The latter 3/10 time points are test data (drop out train (1/2) and gap (1/5) sets).
+Ti_gap=Ti*0.2 
+
+# sparse EM algorithm 
+sEM_fit=sEM(Y,A_init,sig2_eta_init,sig2_epsilon_init,Ti_train,Ti_gap,tol_seq,ht_seq,is_echo = TRUE)
+
+# estimate of A 
+sEM_fit$A_est 
+
+# estimate of error variances 
+c(sEM_fit$sig2_epsilon_hat,sEM_fit$sig2_eta_hat) 
+```
+
+
+The second example is statistical inference. 
+```{r}
+
+# use sparse EM estimates to construct test. Alternative consistent estimators can also be adopted if any. 
+# test the entire matrix.
+
+
+# FDR control levels for simultaneous testing 
+FDR_levels=c(0.05,0.1)
+
+
+# if null hypotheses are true (null hypothesis is true A): 
+# p-value should > 0.05, and simultaneous testing selects no entries. 
+true_null=hdVARtest(Y,sEM_fit$A_est,sEM_fit$sig2_eta_hat,sEM_fit$sig2_epsilon_hat,
+                    global_H0=A,global_idx=NULL,simul_H0=A,
+                    simul_idx=NULL,FDR_levels=FDR_levels)
+
+# global pvalue: 
+true_null$pvalue
+# selection at FDR=0.05 control level 
+true_null$selected[,,FDR_levels==0.05]
+
+
+
+# if null hypotheses are false (null hypothesis is zero matrix): 
+# p-value should < 0.05, and simultaneous testing selects diagnoal entries. 
+false_null=hdVARtest(Y,sEM_fit$A_est,sEM_fit$sig2_eta_hat,sEM_fit$sig2_epsilon_hat,
+                     global_H0=matrix(0,p,p),global_idx=NULL,simul_H0=matrix(0,p,p),
+                     simul_idx=NULL,FDR_levels=c(0.05,0.1))
+
+# global pvalue: 
+false_null$pvalue
+# selection at FDR=0.05 control level 
+false_null$selected[,,FDR_levels==0.05]
+```
+
+
+[Back to Top](#top)
+
+
+<a id="ref"></a>
+
+# Reference 
+1. Lyu, Xiang, Jian Kang, and Lexin Li. *Statistical Inference for High-Dimensional Vector Autoregression with Measurement Error.* ***arXiv preprint*** **arXiv:2009.08011 (2020)**.
+
+[1]: https://arxiv.org/abs/2009.08011

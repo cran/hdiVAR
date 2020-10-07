@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Xiang Lyu" />
+
+
+<title>Vignette of R package hdiVAR</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Vignette of R package hdiVAR</h1>
+<h4 class="author">Xiang Lyu</h4>
+<h4 class="date">Sep 25, 2020</h4>
+
+
+
+<p><a id="top"></a></p>
+<blockquote>
+<p><a href="#basic">Basic info</a></p>
+</blockquote>
+<blockquote>
+<p><a href="#setup">Problem setup</a></p>
+</blockquote>
+<blockquote>
+<p><a href="#method">Methodology</a></p>
+</blockquote>
+<blockquote>
+<p><a href="#example">Quick Start</a></p>
+</blockquote>
+<blockquote>
+<p><a href="#ref">Reference</a></p>
+</blockquote>
+<p><a id="basic"></a></p>
+<div id="basic-info" class="section level1">
+<h1>Basic Info</h1>
+<p>This package considers the estimation and statistical inference of high-dimensional vector autoregression with measurement error, also known as linear gaussian state-space model. A sparse expectation-maximization (EM) algorithm is provided for parameter estimation. For transition matrix inference, both global testing and simultaneous testing are implemented, with consistent size and false discovery rate (FDR) control. The methods are proposed in <a href="https://arxiv.org/abs/2009.08011">Lyu et al. (2020)</a>.</p>
+<p><a id="setup"></a></p>
+</div>
+<div id="problem-setup" class="section level1">
+<h1>Problem setup</h1>
+<p>The model of interest is high-dimensional vector autoregression (VAR) with measurement error, <span class="math display">\[
+\mathbf{y}_{t} =  \mathbf{x}_{t} + \mathbf{\epsilon}_{t}, \ \ \ \     
+\mathbf{x}_{t+1}  =  \mathbf{A}_* \mathbf{x}_{t}  + \mathbf{\eta}_{t},
+\]</span> where <span class="math inline">\(\mathbf{y}_{t} \in \mathbb{R}^{p}\)</span> is the observed multivariate time series, <span class="math inline">\(\mathbf{x}_{t}\in \mathbb{R}^{p}\)</span> is the multivariate latent signal that admits an autoregressive structure, <span class="math inline">\(\mathbf{\epsilon}_{t}\in \mathbb{R}^{p}\)</span> is the measurement error for the observed time series, <span class="math inline">\(\mathbf{\eta}_{t} \in \mathbb{R}^{p}\)</span> is the white noise of the latent signal, and <span class="math inline">\(\mathbf{A}_*\in \mathbb{R}^{p\times p}\)</span> is the sparse transition matrix that encodes the directional relations among the latent signal variables of <span class="math inline">\(\mathbf{x}_{t}\)</span>. Furthermore, we focus on the scenario <span class="math inline">\(\|\mathbf{A}_*\|_2 &lt;1\)</span> such that the VAR model of <span class="math inline">\(\mathbf{x}_{t}\)</span> is stationary. The error terms <span class="math inline">\(\mathbf{\epsilon}_{t}\)</span> and <span class="math inline">\(\mathbf{\eta}_{t}\)</span> are i.i.d. multivariate normal with mean zero and covariance <span class="math inline">\(\sigma_{\epsilon,*}^2 \mathbf{I}_p\)</span> and <span class="math inline">\(\sigma_{\eta,*}^2 \mathbf{I}_p\)</span>, respectively, and are independent of <span class="math inline">\(\mathbf{x}_{t}\)</span>. This package can handle high-dimensional setting where <span class="math inline">\(p^2\)</span> exceeds the length of series <span class="math inline">\(T\)</span>.</p>
+<p>Estimation aims to recover <span class="math inline">\(\{\mathbf{A}_*, \sigma_{\eta,*}^2, \sigma_{\epsilon,*}^2\}\)</span> from observation <span class="math inline">\(\mathbf{y}_{t}\)</span>'s. The statistical inference goal is the transition matrix <span class="math inline">\(\mathbf{A}_*\)</span>. The global hypotheses is <span class="math display">\[
+H_{0}: A_{*,ij} = A_{0,ij}, \  \textrm{ for all } (i,j) \in \mathcal{S} \quad \textrm{versus} \quad  H_{1}: A_{*,ij} \neq A_{0,ij},  \ \textrm{ for some } (i,j) \in \mathcal{S},
+\]</span> for a given <span class="math inline">\(\mathbf{A}_{0} = (A_{0,ij}) \in \mathbb{R}^{p \times p}\)</span> and <span class="math inline">\(\mathcal{S} \subseteq [p] \times [p]\)</span>, where <span class="math inline">\([p] = \{1, \ldots, p\}\)</span>. The most common choice is <span class="math inline">\(\mathbf{A}_0=\mathbf{0}_{p\times p}\)</span> and <span class="math inline">\(\mathcal{S} =[p] \times [p]\)</span>. The simultaneous hypotheses are <span class="math display">\[
+H_{0; ij}: A_{*,ij} = A_{0,ij},  \quad \textrm{versus} \quad  H_{1; ij}: A_{*,ij} \ne A_{0,ij},  \ \textrm{ for all } (i, j) \in \mathcal{S}. 
+\]</span></p>
+<p><a id="method"></a></p>
+</div>
+<div id="methodology" class="section level1">
+<h1>Methodology</h1>
+<div id="estimation-sparse-em-algorithm" class="section level2">
+<h2>1. Estimation: sparse EM algorithm</h2>
+<p>Let <span class="math inline">\(\{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T}\)</span> denote the complete data, where <span class="math inline">\(T\)</span> is the total number of observations, <span class="math inline">\(\mathbf{y}_{t}\)</span> is observed but <span class="math inline">\(\mathbf{x}_{t}\)</span> is latent. Let <span class="math inline">\(\Theta = \left\{ \mathbf{A}, \sigma_{\eta}^2, \sigma_{\epsilon}^2 \right\}\)</span> collect all the parameters of interest in model , and <span class="math inline">\(\Theta_* = \left\{ \mathbf{A}_*, \sigma_{\eta,*}^2, \sigma_{\epsilon,*}^2 \right\}\)</span> denote the true parameters. The goal is to estimate <span class="math inline">\(\Theta_*\)</span> by maximizing the log-likelihood function of the observed data, <span class="math inline">\(\ell (\Theta | \{\mathbf{y}_{t}\}_{t=1}^T)\)</span>, with respect to <span class="math inline">\(\Theta\)</span>. The computation of <span class="math inline">\(\ell (\Theta | \{\mathbf{y}_{t}\}_{t=1}^T)\)</span>, however, is highly nontrivial. Sparse EM algorithm then turns to an auxiliary function, named the finite-sample <span class="math inline">\(Q\)</span>-function, <span class="math display">\[
+Q_y (\Theta | \Theta') = \mathbb{E} \left[ \ell\left( \Theta | \{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T} \right) | \{ \mathbf{y}_{t}\}_{t=1}^T, \Theta' \right],
+\]</span> which is defined as the expectation of the log-likelihood function for the complete data <span class="math inline">\(\ell(\Theta | \{ \mathbf{y}_{t},\mathbf{x}_{t} \}_{t=1}^{T})\)</span>, conditioning on a parameter set <span class="math inline">\(\Theta'\)</span> and the observed data <span class="math inline">\(\mathbf{y}_t\)</span>, and the expectation is taken with respect to the latent data <span class="math inline">\(\mathbf{x}_t\)</span>. The <span class="math inline">\(Q\)</span>-function can be computed efficiently by Kalman filter and smoothing, and provides a lower bound of the target log-likelihood function <span class="math inline">\(\ell (\Theta|\{\mathbf{y}_{t}\}_{t=1}^T)\)</span> for any <span class="math inline">\(\Theta\)</span>. The equality <span class="math inline">\(\ell (\Theta'|\{\mathbf{y}_{t}\}_{t=1}^T) = Q_y(\Theta' | \Theta')\)</span> holds if <span class="math inline">\(\Theta = \Theta'\)</span>. Maximizing Q-function provides an uphill step of the likelihood. Starting from an initial set of parameters <span class="math inline">\(\hat\Theta_0\)</span>, sparse EM algorithm then alternates between the expectation step (E-step), where the <span class="math inline">\(Q\)</span>-function <span class="math inline">\(Q_y (\Theta | \hat{\Theta}_{k})\)</span> conditioning on the parameters <span class="math inline">\(\hat\Theta_{k}\)</span> of the <span class="math inline">\(k\)</span>th iteration is computed, and the maximization step (M-step), where the parameters are updated by maximizing the <span class="math inline">\(Q\)</span>-function <span class="math inline">\(\hat{\Theta}_{k+1} = \arg\max_{\Theta} Q_y (\Theta | \hat{\Theta}_{k})\)</span>.</p>
+<p>For the M-step, the maximizer of <span class="math inline">\(Q_y(\Theta | \hat{\Theta}_{k})\)</span> satisfies that <span class="math inline">\(\frac{1}{T-1} \sum_{t=1}^{T-1} \mathbf{E}_{t,t+1;k} = \{\frac{1}{T-1}\sum_{t=1}^{T-1} \mathbf{E}_{t,t;k} \}\mathbf{A}^\top\)</span>, where <span class="math inline">\(\mathbf{E}_{t,s;k} = \mathbb{E} \left\{ \mathbf{x}_{t}\mathbf{x}_{s}^\top | \{\mathbf{y}_{t'}\}_{t'=1}^T, \hat{\Theta}_{k-1} \right\}\)</span> for <span class="math inline">\(s, t\in [T]\)</span> is obtained from the E-step. Instead of directly inverting the matrix involving <span class="math inline">\(\mathbf{E}_{t,t;k}\)</span>'s, which is computationally challenging when the dimension <span class="math inline">\(p\)</span> is high and yields a dense estimator of <span class="math inline">\(\mathbf{A}_*\)</span> leading to a divergent statistical error, sparse EM algorithm implements generalized Dantzig selector for Yule-Walker equation,<br />
+<span class="math display">\[
+\hat{\mathbf{A}}_{k} = \arg\min_{\mathbf{A} \in \mathbb{R}^{p\times p}}  \|\mathbf{A}\|_1, \;\; \textrm{such that} \;  \left\| \frac{1}{T-1} \sum_{t=1}^{T-1}   \mathbf{E}_{t,t+1;k} -\frac{1}{T-1} \sum_{t=1}^{T-1} \mathbf{E}_{t,t;k} \mathbf{A}^\top \right\|_{\max} \le \tau_k,
+\]</span> where <span class="math inline">\(\tau_k\)</span> is the tolerance parameter that is tuned via cross-validation each iteration (in the observed time series, first <code>Ti_train</code> time points serve as training set, then gap <code>Ti_gap</code> time points, and use the remain as test set). The optimization problem  is solved using linear programming in a row-by-row parallel fashion. In the package, an option of further hard thresholding <span class="math inline">\(\hat{\mathbf{A}}_{k}\)</span> is provided to improve model selection performance. Hard thresholding sets entries of magnitude less than threshold level as zero. The variance estimates are next updated as, <span class="math display">\[
+\begin{align} \label{eqn: epsilon}
+\begin{split}
+\hat\sigma_{\eta,k}^2 &amp; =  \frac{1}{p(T-1)} \sum_{t=1}^{T-1} \left\{ \mathrm{tr}( \mathbf{E}_{t+1,t+1;k})  -   \mathrm{tr}\left ( \hat{\mathbf{A}}_{k}  \mathbf{E}_{t,t+1;k} \right) \right\} , \\
+\hat\sigma^2_{\epsilon,k} &amp; =  \frac{1}{pT } \sum_{t=1}^{T} \left\{ \mathbf{y}_{t}^\top \mathbf{y}_{t} - 2 \mathbf{y}_{t}^\top  \mathbf{E}_{t;k} + \mathrm{tr} (\mathbf{E}_{t,t;k}) \right\}, 
+\end{split}  
+\end{align} 
+\]</span> where <span class="math inline">\(\mathbf{E}_{t;k} = \mathbb{E} \{ \mathbf{x}_{t} | \{\mathbf{y}_{t'}\}_{t'=1}^T, \hat{\Theta}_{k-1} \}\)</span> for <span class="math inline">\(t \in [T]\)</span>, and  comes from taking derivative on <span class="math inline">\(Q_y(\Theta | \hat{\Theta}_{k})\)</span>. Sparse EM algorithm terminates when reaches the maximal number of iterations or the estimates are close enough in two consecutive iterations, e.g., <span class="math inline">\(\min \left\{ \|\hat{\mathbf{A}}_{k} -\hat{\mathbf{A}}_{k-1} \|_F , | \hat{\sigma}_{\eta,k }-\hat{\sigma}_{\eta,k-1}| ,| \hat{\sigma}_{\epsilon, k}-\hat{\sigma}_{\epsilon, k-1}| \right\} \le 10^{-3}\)</span>.</p>
+</div>
+<div id="statistical-inference" class="section level2">
+<h2>2. Statistical inference</h2>
+<div id="a-gaussian-test-statistic-matrix" class="section level4">
+<h4>2.a Gaussian test statistic matrix</h4>
+<p>The fundamental tools of testing is a gausisan test statistic matrix whose entries marginally follow standard normal under null.</p>
+<p>The test statistic is constructed as follows. Observation <span class="math inline">\(\mathbf{y}_t\)</span> follows an autoregressive structure, <span class="math inline">\(\mathbf{y}_{t+1} = \mathbf{A}_* \mathbf{y}_{t} + \mathbf{e}_{t}\)</span>, with the error term <span class="math inline">\(\mathbf{e}_{t} = - \mathbf{A}_* \mathbf{\epsilon}_{t}+ \mathbf{\epsilon}_{t+1} + \mathbf{\eta}_{t}\)</span>. Then the lag-1 auto-covariance of the error <span class="math inline">\(\mathbf{e}_t\)</span> is of the form, <span class="math display">\[
+\mathbf{\Sigma}_e = \mathrm{Cov}(\mathbf{e}_{t},\mathbf{e}_{t-1}) = -\sigma_{\epsilon,*}^2 \mathbf{A}_*.
+\]</span> This suggests that we can apply the covariance testing methods on <span class="math inline">\(\mathbf{\Sigma}_e\)</span> to infer transition matrix <span class="math inline">\(\mathbf{A}_*\)</span>. However, <span class="math inline">\(\mathbf{e}_t\)</span> is not directly observed. Define generic estimates of <span class="math inline">\(\Theta_*\)</span> by <span class="math inline">\(\left \{\hat{\mathbf{A}},\hat\sigma_{\epsilon}^2, \hat\sigma_{\eta}^2 \right\}\)</span> (sparse EM estimates also work). We use them to reconstruct this error, and obtain the sample lag-1 auto-covariance estimator, <span class="math display">\[\hat{\mathbf{\Sigma}}_e = \frac{1}{T-2} \sum_{t=2}^{T-1} \hat{\mathbf{e}}_{t}\hat{\mathbf{e}}_{t-1}^\top, \ \text{where} \ \ \hat{\mathbf{e}}_{t} = \mathbf{y}_{t+1}  - \hat{\mathbf{A}} \mathbf{y}_{t} - \frac{1}{T-1}\sum_{t'=1}^{T-1} (\mathbf{y}_{t'+1} - \hat{\mathbf{A}}\mathbf{y}_{t'}).\]</span></p>
+<p>This sample estimator <span class="math inline">\(\hat{\mathbf{\Sigma}}_e\)</span>, nevertheless, involves some bias due to the reconstruction of the error term, and also an inflated variance due to the temporal dependence of the time series data. Bias and variance correction lead to the Gaussian matrix test statistic <span class="math inline">\(\mathbf{H}\)</span>, whose <span class="math inline">\((i,j)\)</span>th entry is,<br />
+<span class="math display">\[
+H_{ij} = \frac{ \sum_{t=2}^{T-1}  \{ \hat{e}_{ t,i}\hat{e}_{ t-1,j} + \left( \hat{\sigma}_{\eta}^2 +\hat{\sigma}_{\epsilon}^2 \right)  \hat{A}_{ij}  - \hat{\sigma}_\eta^2 A_{0,ij} \} }{\sqrt{T-2} \; \hat{\sigma}_{ij}}, \quad i,j \in [p]. 
+\]</span> <a href="https://arxiv.org/abs/2009.08011">Lyu et al. (2020)</a> proves that, under mild assumptions,<br />
+<span class="math display">\[
+\frac{ \sum_{t=2}^{T-1}  \{\hat{e}_{ t,i}\hat{e}_{ t-1,j} + \left( \hat{\sigma}_{\eta}^2 +\hat{\sigma}_{\epsilon}^2 \right)  \hat{A}_{ij}  - \hat{\sigma}_\eta^2 A_{*,ij} \}}{\sqrt{T-2} \; \hat{\sigma}_{ij}}\rightarrow_{d} \mathrm{N}(0, 1)
+\]</span> uniformly for <span class="math inline">\(i,j \in [p]\)</span> as <span class="math inline">\(p, T \to \infty\)</span>.</p>
+</div>
+<div id="b-global-testing" class="section level4">
+<h4>2.b Global testing</h4>
+The key insight of global testing is that the squared maximum entry of a zero mean normal vector converges to a Gumbel distribution. Specifically, the global test statistic is<br />
+<span class="math display">\[
+G_{\mathcal{S}} = \max_{(i,j) \in \mathcal{S}} H_{ij}^2. 
+\]</span> <a href="https://arxiv.org/abs/2009.08011">Lyu et al. (2020)</a> justifies that the asymptotic null distribution of <span class="math inline">\(G_{\mathcal{S}}\)</span> is Gumbel, <span class="math display">\[
+\lim_{|\mathcal{S}| \rightarrow \infty} \mathbb{P} \Big( G_\mathcal{S}  -2 \log |\mathcal{S}| + \log \log |\mathcal{S}| \le x \Big) = \exp \left\{- \exp (-x/2) / \sqrt{\pi} \right\}.
+\]</span> It leads to an asymptotic <span class="math inline">\(\alpha\)</span>-level test,
+<span class="math display">\[\begin{eqnarray*}
+\Psi_\alpha = \mathbb{1} \big[ G_\mathcal{S} &gt; 2 \log |\mathcal{S}| -  \log \log |\mathcal{S}| - \log \pi -2 \log\{-\log(1-\alpha)\} \big]. 
+\end{eqnarray*}\]</span>
+<p>The global null is rejected if <span class="math inline">\(\Psi_\alpha=1\)</span>.</p>
+</div>
+<div id="c-simultaneous-testing" class="section level4">
+<h4>2.c Simultaneous testing</h4>
+Let <span class="math inline">\(\mathcal{H}_0 = \{(i,j) : A_{*,ij}=A_{0,ij}, (i,j) \in \mathcal{S} \}\)</span> denote the set of true null hypotheses, and <span class="math inline">\(\mathcal{H}_1 = \{ (i,j) : (i,j)\in \mathcal{S} , (i,j) \notin \mathcal{H}_0\}\)</span> denote the set of true alternatives. The test statistic <span class="math inline">\(H_{ij}\)</span> follows a standard normal distribution when <span class="math inline">\(H_{0;ij}\)</span> holds, and as such, we reject <span class="math inline">\(H_{0;ij}\)</span> if <span class="math inline">\(|H_{ij}| &gt; t\)</span> for some thresholding value <span class="math inline">\(t &gt; 0\)</span>. Let <span class="math inline">\(R_{\mathcal{S}}(t) = \sum_{(i,j) \in \mathcal{S}} \mathbb{1} \{ |H_{ij}|&gt; t\}\)</span> denote the number of rejections at <span class="math inline">\(t\)</span>. Then the false discovery proportion (FDP) and the false discovery rate (FDR) in the simultaneous testing problem are,
+<span class="math display">\[\begin{eqnarray*}
+\textrm{FDP}_{\mathcal{S}}(t)=\frac{\sum_{(i,j) \in \mathcal{H}_0} \mathbb{1} \{ |H_{ij}|&gt; t\}}{R_{\mathcal{S}}(t)\vee 1}, \;\; \textrm{ and  } \;\; 
+\textrm{FDR}_{\mathcal{S}}(t) = \mathbb{E} \left\{ \textrm{FDP}_{\mathcal{S}}(t) \right\}.
+\end{eqnarray*}\]</span>
+<p>An ideal choice of the threshold <span class="math inline">\(t\)</span> is to reject as many true positives as possible, while controlling the false discovery at the pre-specified level <span class="math inline">\(\beta\)</span>, that is <span class="math inline">\(\inf \{ t &gt; 0 : \text{FDP}_{\mathcal{S}} (t) \le \beta \}\)</span>. However, <span class="math inline">\(\mathcal{H}_0\)</span> in <span class="math inline">\(\text{FDP}_{\mathcal{S}} (t)\)</span> is unknown. Observing that <span class="math inline">\(\mathbb{P} ( |H_{ij}|&gt; t ) \approx 2\{ 1- \Phi (t) \}\)</span>, where <span class="math inline">\(\Phi (\cdot)\)</span> is the cumulative distribution function of a standard normal distribution, the false rejections <span class="math inline">\(\sum_{(i,j) \in\mathcal{H}_0} \mathbb{1} \{ |H_{ij}|&gt; t\}\)</span> in <span class="math inline">\(\text{FDP}_{\mathcal{S}} (t)\)</span> can be approximated by <span class="math inline">\(\{ 2- 2 \Phi(t) \} |\mathcal{S}|\)</span>. Moreover, the search of <span class="math inline">\(t\)</span> is restricted to the range <span class="math inline">\(\left(0, \sqrt{2\log |\mathcal{S}|} \right]\)</span>, since <span class="math inline">\(\mathbb{P}\left( \hat{t} \text{ exists in } \left(0, \sqrt{2\log |\mathcal{S}|}\right] \right) \to 1\)</span> as shown in the theoretical justification of <a href="https://arxiv.org/abs/2009.08011">Lyu et al. (2020)</a>. The simultaneous testing procedure is justified that consistently control FDR, <span class="math display">\[
+\lim_{|\mathcal{S}| \to \infty} \frac{\text{FDR}_{\mathcal{S}} (\, \hat{t} \; )}{\beta |\mathcal{H}_0|/|\mathcal{S}|} = 1, \quad \textrm{ and } \quad 
+\frac{\text{FDP}_{\mathcal{S}} (\, \hat{t} \; )}{\beta | \mathcal{H}_0|/|\mathcal{S}|}\rightarrow_{p} 1 \;\;  \textrm{ as } \; |\mathcal{S}| \to \infty.
+\]</span></p>
+<p><a id="example"></a></p>
+</div>
+</div>
+</div>
+<div id="quick-start" class="section level1">
+<h1>Quick start</h1>
+<p>The purpose of this section is to show users the basic usage of this package. We will briefly go through main functions, see what they can do and have a look at outputs. An detailed example of complete procedures of estimation and inference is be presented to give users a general sense of the pakcage.</p>
+<p>We first generate observations from the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(hdiVAR)
+
+<span class="kw">set.seed</span>(<span class="dv">123</span>)
+p=<span class="dv">3</span>; Ti=<span class="dv">400</span>  <span class="co"># dimension and time</span>
+A=<span class="kw">diag</span>(<span class="dv">1</span>,p) <span class="co"># transition matrix</span>
+sig_eta=sig_epsilon=<span class="fl">0.2</span> <span class="co"># error std</span>
+Y=<span class="kw">array</span>(<span class="dv">0</span>,<span class="dt">dim=</span><span class="kw">c</span>(p,Ti)) <span class="co">#observation t=1, ...., Ti</span>
+X=<span class="kw">array</span>(<span class="dv">0</span>,<span class="dt">dim=</span><span class="kw">c</span>(p,Ti)) <span class="co">#latent t=1, ...., T</span>
+Ti_burnin=<span class="dv">400</span> <span class="co"># time for burn-in to stationarity</span>
+<span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(Ti<span class="op">+</span>Ti_burnin)) {
+ <span class="cf">if</span> (t<span class="op">==</span><span class="dv">1</span>){
+   x1=<span class="kw">rnorm</span>(p)
+ } <span class="cf">else</span> <span class="cf">if</span> (t<span class="op">&lt;=</span>Ti_burnin) { <span class="co"># burn in</span>
+   x1=A<span class="op">%*%</span>x1<span class="op">+</span><span class="kw">rnorm</span>(p,<span class="dt">mean=</span><span class="dv">0</span>,<span class="dt">sd=</span>sig_eta)
+ } <span class="cf">else</span> <span class="cf">if</span> (t<span class="op">==</span>(Ti_burnin<span class="op">+</span><span class="dv">1</span>)){ <span class="co"># time series used for learning</span>
+   X[,t<span class="op">-</span>Ti_burnin]=x1
+   Y[,t<span class="op">-</span>Ti_burnin]=X[,t<span class="op">-</span>Ti_burnin]<span class="op">+</span><span class="kw">rnorm</span>(p,<span class="dt">mean=</span><span class="dv">0</span>,<span class="dt">sd=</span>sig_epsilon)
+ } <span class="cf">else</span> {
+   X[,t<span class="op">-</span><span class="st"> </span>Ti_burnin]=A<span class="op">%*%</span>X[,t<span class="op">-</span><span class="dv">1</span><span class="op">-</span><span class="st"> </span>Ti_burnin]<span class="op">+</span><span class="kw">rnorm</span>(p,<span class="dt">mean=</span><span class="dv">0</span>,<span class="dt">sd=</span>sig_eta)
+   Y[,t<span class="op">-</span><span class="st"> </span>Ti_burnin]=X[,t<span class="op">-</span><span class="st"> </span>Ti_burnin]<span class="op">+</span><span class="kw">rnorm</span>(p,<span class="dt">mean=</span><span class="dv">0</span>,<span class="dt">sd=</span>sig_epsilon)
+ }
+}</code></pre></div>
+<p>The first example is sparse EM algorithm.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># cross-validation grid of tolerance parameter \tau_k in Dantzig selector.</span>
+tol_seq=<span class="kw">c</span>(<span class="fl">0.0001</span>,<span class="fl">0.0003</span>,<span class="fl">0.0005</span>) 
+
+<span class="co"># cross-validation grid of hard thresholding levels in transition matrix estimate. </span>
+<span class="co"># Set as zero to avoid thresholding. The output is \hat{A}_k.</span>
+ht_seq=<span class="dv">0</span> 
+
+
+A_init=<span class="kw">diag</span>(<span class="fl">0.1</span>,p) <span class="co"># initial estimate of A </span>
+<span class="co"># initial estimates of error variances </span>
+sig2_eta_init=sig2_epsilon_init=<span class="fl">0.1</span> 
+
+<span class="co"># the first half time points are training data </span>
+Ti_train=Ti<span class="op">*</span><span class="fl">0.5</span>
+
+<span class="co"># The latter 3/10 time points are test data (drop out train (1/2) and gap (1/5) sets).</span>
+Ti_gap=Ti<span class="op">*</span><span class="fl">0.2</span> 
+
+<span class="co"># sparse EM algorithm </span>
+sEM_fit=<span class="kw">sEM</span>(Y,A_init,sig2_eta_init,sig2_epsilon_init,Ti_train,Ti_gap,tol_seq,ht_seq,<span class="dt">is_echo =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## [1] &quot;CV-tuned (lamda,ht) is in (1,1)/(3,1) of the parameter grid.&quot;
+## [1] &quot;CV-tuned (lamda,ht) is in (1,1)/(3,1) of the parameter grid.&quot;
+## [1] &quot;CV-tuned (lamda,ht) is in (1,1)/(3,1) of the parameter grid.&quot;
+## [1] &quot;CV-tuned (lamda,ht) is in (1,1)/(3,1) of the parameter grid.&quot;
+## [1] &quot;CV-tuned (lamda,ht) is in (3,1)/(3,1) of the parameter grid.&quot;
+## sparse EM is terminated due to vanishing updates</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># estimate of A </span>
+sEM_fit<span class="op">$</span>A_est </code></pre></div>
+<pre><code>##            [,1]        [,2]       [,3]
+## [1,] 0.96431768 -0.02789077 0.01344706
+## [2,] 0.01932975  0.99301878 0.00309380
+## [3,] 0.03819598  0.03228185 0.98351193</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># estimate of error variances </span>
+<span class="kw">c</span>(sEM_fit<span class="op">$</span>sig2_epsilon_hat,sEM_fit<span class="op">$</span>sig2_eta_hat) </code></pre></div>
+<pre><code>## [1] 0.06451885 0.06700449</code></pre>
+<p>The second example is statistical inference.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># use sparse EM estimates to construct test. Alternative consistent estimators can also be adopted if any. </span>
+<span class="co"># test the entire matrix.</span>
+
+
+<span class="co"># FDR control levels for simultaneous testing </span>
+FDR_levels=<span class="kw">c</span>(<span class="fl">0.05</span>,<span class="fl">0.1</span>)
+
+
+<span class="co"># if null hypotheses are true (null hypothesis is true A): </span>
+<span class="co"># p-value should &gt; 0.05, and simultaneous testing selects no entries. </span>
+true_null=<span class="kw">hdVARtest</span>(Y,sEM_fit<span class="op">$</span>A_est,sEM_fit<span class="op">$</span>sig2_eta_hat,sEM_fit<span class="op">$</span>sig2_epsilon_hat,
+                    <span class="dt">global_H0=</span>A,<span class="dt">global_idx=</span><span class="ot">NULL</span>,<span class="dt">simul_H0=</span>A,
+                    <span class="dt">simul_idx=</span><span class="ot">NULL</span>,<span class="dt">FDR_levels=</span>FDR_levels)
+
+<span class="co"># global pvalue: </span>
+true_null<span class="op">$</span>pvalue</code></pre></div>
+<pre><code>## [1] 0.4193607</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># selection at FDR=0.05 control level </span>
+true_null<span class="op">$</span>selected[,,FDR_levels<span class="op">==</span><span class="fl">0.05</span>]</code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]    0    0    0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># if null hypotheses are false (null hypothesis is zero matrix): </span>
+<span class="co"># p-value should &lt; 0.05, and simultaneous testing selects diagnoal entries. </span>
+false_null=<span class="kw">hdVARtest</span>(Y,sEM_fit<span class="op">$</span>A_est,sEM_fit<span class="op">$</span>sig2_eta_hat,sEM_fit<span class="op">$</span>sig2_epsilon_hat,
+                     <span class="dt">global_H0=</span><span class="kw">matrix</span>(<span class="dv">0</span>,p,p),<span class="dt">global_idx=</span><span class="ot">NULL</span>,<span class="dt">simul_H0=</span><span class="kw">matrix</span>(<span class="dv">0</span>,p,p),
+                     <span class="dt">simul_idx=</span><span class="ot">NULL</span>,<span class="dt">FDR_levels=</span><span class="kw">c</span>(<span class="fl">0.05</span>,<span class="fl">0.1</span>))
+
+<span class="co"># global pvalue: </span>
+false_null<span class="op">$</span>pvalue</code></pre></div>
+<pre><code>## [1] 8.75966e-14</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># selection at FDR=0.05 control level </span>
+false_null<span class="op">$</span>selected[,,FDR_levels<span class="op">==</span><span class="fl">0.05</span>]</code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1</code></pre>
+<p><a href="#top">Back to Top</a></p>
+<p><a id="ref"></a></p>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<ol style="list-style-type: decimal">
+<li>Lyu, Xiang, Jian Kang, and Lexin Li. <em>Statistical Inference for High-Dimensional Vector Autoregression with Measurement Error.</em> <strong><em>arXiv preprint</em></strong> <strong>arXiv:2009.08011 (2020)</strong>.</li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
