@@ -52,8 +52,8 @@ CV_VARMLE=function(tol_seq,ht_seq,S0_train,S1_train,Y_test,is_echo=FALSE){
   ht_min=ht_seq[l_ht]
 
   if (is_echo){
-    print(paste("CV-tuned (lamda,ht) is in (", l_tol,",",l_ht,")/(",length(tol_seq),
-              ",",length(ht_seq),") of the parameter grid.",sep=''))
+    print(paste("CV-tuned (tol, ht) is in (", l_tol,", ",l_ht,")/(",length(tol_seq),
+              ", ",length(ht_seq),") of the parameter grid.",sep=''))
   }
 
   return(list(tol_min=tol_min,ht_min=ht_min,test_loss=test_loss))

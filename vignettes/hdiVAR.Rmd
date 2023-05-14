@@ -260,6 +260,6 @@ false_null$selected[,,FDR_levels==0.05]
 <a id="ref"></a>
 
 # Reference 
-1. Lyu, Xiang, Jian Kang, and Lexin Li. *Statistical Inference for High-Dimensional Vector Autoregression with Measurement Error.* ***arXiv preprint*** **arXiv:2009.08011 (2020)**.
+1. Xiang Lyu, Jian Kang, and Lexin Li. *Statistical Inference for High-Dimensional Vector Autoregression with Measurement Error.* ***arXiv preprint*** **arXiv:2009.08011 (2020)**.
 
 [1]: https://arxiv.org/abs/2009.08011

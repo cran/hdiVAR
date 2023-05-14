@@ -23,7 +23,7 @@
 #' @param n_em scalar; the maximal allowed number of EM iterations, otherwise the algorithm is terminated due to too many iterations.
 #' If \code{n_em=NULL}, the algorithm will not be terminated due to too many iterations, but vanishing updates instead.
 #' @param is_echo logical; if true, display the information of CV-optimal (tol, ht) each iteration, and of algorithm termination.
-#' @param is_sparse logical; if false, use standard EM algorithm.
+#' @param is_sparse logical; if false, use standard EM algorithm, and arguments for cross-validation are not needed.
 #'
 #'
 #' @return a list of parameter estimates.
@@ -67,7 +67,7 @@
 
 
 
-sEM = function(Y, A_init, sig2_eta_init, sig2_epsilon_init, Ti_train, Ti_gap, tol_seq, ht_seq=0, is_cv=TRUE, thres=1e-3, count_vanish=1, n_em=NULL, is_echo=FALSE, is_sparse=TRUE){
+sEM = function(Y, A_init, sig2_eta_init, sig2_epsilon_init, Ti_train=NULL, Ti_gap=NULL, tol_seq=NULL, ht_seq=0, is_cv=TRUE, thres=1e-3, count_vanish=1, n_em=NULL, is_echo=FALSE, is_sparse=TRUE){
 
   if (is.null(thres)&is.null(n_em)){
     stop("Must choose one stopping criterion. Either vanishing updates (thres) or too many iterations (n_em).")
@@ -125,18 +125,16 @@ sEM = function(Y, A_init, sig2_eta_init, sig2_epsilon_init, Ti_train, Ti_gap, to
                         sig_eta_init=sig_eta_hat,
                         sig_epsilon_init=sig_epsilon_hat,
                         X_init=X_hat_cv,P_init=P_hat_cv)
-      EXtT_train=Estep_train[["EXtT"]]
-      Xtt_train=Estep_train[["Xtt"]]
       EXtt_train=Estep_train[["EXtt"]]
       EXtt1_train=Estep_train[["EXtt1"]]
-      PtT_train=Estep_train[["PtT"]]
 
       # cross validation sparse MLE
-      S0_train = apply(EXtt_train,c(1,2),mean)
+      S0_train = apply(EXtt_train[,,1:(length((Ti-Ti_train+1):Ti)-1)],c(1,2),mean)
       S1_train=apply(EXtt1_train,c(1,2),mean)
       sEM_train=CV_VARMLE(tol_seq,ht_seq,S0_train,S1_train,Y[,1:(Ti-Ti_train-Ti_gap)],is_echo = is_echo)
       tol_min=sEM_train$tol_min
       ht_min=sEM_train$ht_min
+      rm(S0_train,S1_train,EXtt_train,EXtt1_train,Estep_train)
     } else { # if not CV, use the first element.
       tol_min=tol_seq[1]
       ht_min=ht_seq[1]
@@ -150,17 +148,15 @@ sEM = function(Y, A_init, sig2_eta_init, sig2_epsilon_init, Ti_train, Ti_gap, to
                        sig_epsilon_init=sig_epsilon_hat,
                        X_init=X_hat,P_init=P_hat)
     EXtT=Estep_result[["EXtT"]]
-    Xtt=Estep_result[["Xtt"]]
     EXtt=Estep_result[["EXtt"]]
     EXtt1=Estep_result[["EXtt1"]]
-    PtT=Estep_result[["PtT"]]
-
+    rm(Estep_result)
 
     ##########################################################
     #### estimate A by sparse MLE via linear programming  ####
     ##########################################################
     A_old=A_est # old estimate
-    S0=apply(EXtt,c(1,2),mean)
+    S0=apply(EXtt[,,1:(Ti-1)],c(1,2),mean)
     if (is_sparse){
       S1=apply(EXtt1,c(1,2),mean)
       A_est=VARMLE(S0,S1,tol_min)
@@ -178,6 +174,7 @@ sEM = function(Y, A_init, sig2_eta_init, sig2_epsilon_init, Ti_train, Ti_gap, to
     # update error variance
     sig_eta_hat=Mstep_result[["sig_eta"]]  # new estimate
     sig_epsilon_hat=Mstep_result[["sig_epsilon"]]
+    rm(EXtT,EXtt,EXtt1)
 
     if (!is_sparse){ # naive MLE of A
       A_est=Mstep_result[["A"]]

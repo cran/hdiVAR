@@ -27,12 +27,12 @@ VARMLE = function(S0,S1,tol){
   lp_constr[1:p, 1:p]=-S0;lp_constr[1:p, (p+1):(2*p)]=S0
   lp_constr[(p+1):(2*p), 1:p]=S0;lp_constr[(p+1):(2*p), (p+1):(2*p)]=-S0
   lp_constr[(2*p+1):(4*p),]=diag(1,2*p)
-  lp_rhs=matrix(0,4*p,p);lp_obj=rep(1,2*p);lp_ineq=rep(">=",4*p)
+  lp_obj=rep(1,2*p);lp_ineq=rep(">=",4*p)
 
   # linear programming/Dantzig selector
   A_est_stat_tmp=sapply(1:p, FUN=function(x){
-    lp_rhs[,x]=matrix(c(-tol-S1[,x],-tol+S1[,x],rep(0,2*p)),4*p,1)
-    lp_out=lp('min',lp_obj,lp_constr,lp_ineq,lp_rhs[,x])$solution
+    lp_rhs=matrix(c(-tol-S1[,x],-tol+S1[,x],rep(0,2*p)),4*p,1)
+    lp_out=lp('min',lp_obj,lp_constr,lp_ineq,lp_rhs)$solution
     out=matrix(lp_out[1:p]-lp_out[(1+p):(p+p)],p,1)
     return(out)
   })

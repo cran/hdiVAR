@@ -9,9 +9,9 @@ sEM(
   A_init,
   sig2_eta_init,
   sig2_epsilon_init,
-  Ti_train,
-  Ti_gap,
-  tol_seq,
+  Ti_train = NULL,
+  Ti_gap = NULL,
+  tol_seq = NULL,
   ht_seq = 0,
   is_cv = TRUE,
   thres = 0.001,
@@ -53,7 +53,7 @@ If \code{n_em=NULL}, the algorithm will not be terminated due to too many iterat
 
 \item{is_echo}{logical; if true, display the information of CV-optimal (tol, ht) each iteration, and of algorithm termination.}
 
-\item{is_sparse}{logical; if false, use standard EM algorithm.}
+\item{is_sparse}{logical; if false, use standard EM algorithm, and arguments for cross-validation are not needed.}
 }
 \value{
 a list of parameter estimates.
